@@ -16,6 +16,19 @@ let totalVotes = 0;
 const MAX_VOTES = 10; // Set the voting limit here
 
 // --- API Endpoints ---
+// Add this GET endpoint somewhere before "app.listen"
+
+app.get('/reset', (req, res) => {
+    // Reset all the variables to their initial state
+    voteCounts = { 'A': 0, 'B': 0, 'C': 0 };
+    lastVote = null;
+    totalVotes = 0;
+    
+    console.log("--- SERVER STATE HAS BEEN RESET ---");
+    
+    // Send a confirmation message back
+    res.json({ message: "Server has been reset successfully!" });
+});
 app.post('/vote', (req, res) => {
     // 1. CHECK IF VOTING HAS ENDED FIRST
     if (totalVotes >= MAX_VOTES) {

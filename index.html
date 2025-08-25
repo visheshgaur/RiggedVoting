@@ -16,7 +16,7 @@
     <button class="candidate-btn" onclick="castVote('A')">Candidate A</button>
     <button class="candidate-btn" onclick="castVote('B')">Candidate B</button>
     <button class="candidate-btn" onclick="castVote('C')">Candidate C</button>
-
+    <button onclick="resetServer()">Reset Election</button>
     <div id="message"></div>
 
     <script>
@@ -33,6 +33,23 @@
             // Display the message returned from the server
             document.getElementById('message').innerText = result.message;
         }
+         // This is the existing function
+    async function castVote(candidate) {
+        // ... your existing castVote code is here ...
+    }
+
+    // --- NEW FUNCTION FOR THE RESET BUTTON ---
+    async function resetServer() {
+        const response = await fetch('/reset');
+        const result = await response.json();
+        
+        // Update the message and re-enable the buttons
+        document.getElementById('message').innerText = result.message;
+        const buttons = document.querySelectorAll('.candidate-btn');
+        buttons.forEach(button => {
+            button.disabled = false;
+        });
+    }
     </script>
 
 </body>
