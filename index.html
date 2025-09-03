@@ -18,37 +18,69 @@
     <button class="candidate-btn" onclick="castVote('C')">Candidate C</button>
     <button onclick="resetServer()">Reset Election</button>
     <div id="message"></div>
+      <div id="results-container" style="margin: 30px; padding: 15px; border: 1px solid #ccc; border-radius: 8px;">
+        <h2>Current Vote Count</h2>
+        <p style="font-size: 20px; word-spacing: 20px;">
+            <b>A:</b> <span id="votes-A">0</span>
+            <b>B:</b> <span id="votes-B">0</span>
+            <b>C:</b> <span id="votes-C">0</span>
+        </p>
+    </div>
 
     <script>
-        async function castVote(candidate) {
-            // The fetch request points to our Node.js server's endpoint
-            const response = await fetch('/vote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ candidate: candidate })
-            });
-            
-            const result = await response.json();
-            
-            // Display the message returned from the server
-            document.getElementById('message').innerText = result.message;
-        }
-         // This is the existing function
-   
+    // --- NEW HELPER FUNCTION to update the UI ---
+    function updateScores(counts) {
+        document.getElementById('votes-A').innerText = counts.A;
+        document.getElementById('votes-B').innerText = counts.B;
+        document.getElementById('votes-C').innerText = counts.C;
+    }
 
-    // --- NEW FUNCTION FOR THE RESET BUTTON ---
+    // --- MODIFIED castVote function ---
+    async function castVote(candidate) {
+        const response = await fetch('/vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ candidate: candidate })
+        });
+        
+        const result = await response.json();
+        
+        // Display the message returned from the server
+        document.getElementById('message').innerText = result.message;
+        
+        // NEW: Update the scores display using the data from the server
+        if (result.voteCounts) {
+            updateScores(result.voteCounts);
+        }
+    }
+
+    // --- MODIFIED resetServer function ---
     async function resetServer() {
         const response = await fetch('/reset');
         const result = await response.json();
         
-        // Update the message and re-enable the buttons
+        // Update the message and scores
         document.getElementById('message').innerText = result.message;
+        if (result.voteCounts) {
+            updateScores(result.voteCounts);
+        }
+        
+        // Re-enable the buttons
         const buttons = document.querySelectorAll('.candidate-btn');
         buttons.forEach(button => {
             button.disabled = false;
         });
     }
-    </script>
+    
+    // --- NEW: Fetch initial scores when the page loads ---
+    window.onload = async () => {
+        const response = await fetch('/results');
+        const result = await response.json();
+        if (result.results) {
+            updateScores(result.results);
+        }
+    };
+</script>
 
 </body>
 </html>
